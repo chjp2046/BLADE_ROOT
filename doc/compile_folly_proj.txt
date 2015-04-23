@@ -1,0 +1,74 @@
+1, 更新python
+
+yum groupinstall "Development tools"
+
+yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+
+# Python 2.7.6:
+wget http://python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz
+tar xf Python-2.7.6.tar.xz
+cd Python-2.7.6
+./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+make && make altinstall
+
+
+2, 更新yum
+
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/gpgme-1.1.8-3.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/pygpgme-0.1-18.20090824bzr68.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/python-iniparse-0.3.1-2.1.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/python-pycurl-7.19.0-8.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/python-urlgrabber-3.9.1-9.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/rpm-4.8.0-37.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/rpm-libs-4.8.0-37.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/rpm-python-4.8.0-37.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-3.2.29-60.el6.centos.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-metadata-parser-1.1.2-16.el6.x86_64.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-utils-1.1.30-30.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-plugin-fastestmirror-1.1.30-30.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-plugin-protectbase-1.1.30-30.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-plugin-aliases-1.1.30-30.el6.noarch.rpm
+http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-plugin-downloadonly-1.1.30-30.el6.noarch.rpm
+
+rpm -Uvh --replacepkgs rpm-python*.rpm yum*.rpm
+
+3, 更新gcc
+https://gcc.gnu.org/wiki/InstallingGCC
+
+tar xzf gcc-4.6.2.tar.gz
+cd gcc-4.6.2
+./contrib/download_prerequisites
+cd ..
+mkdir objdir
+cd objdir
+$PWD/../gcc-4.6.2/configure --prefix=$HOME/gcc-4.6.2 
+make
+make install
+
+----------------------
+报错 	/usr/bin/ld: crt1.o: No such file: No such file or directory
+解决方法
+sudo ln -s /usr/lib/x86_64-linux-gnu /usr/lib64
+../gcc-4.9.2/configure --prefix=/usr/local/gcc/4.9.2 --disable-multilib
+
+
+5. 安装boost
+
+	0. gcc version 4.9.2 (GCC) ; ldd (GNU libc) 2.12
+	1. wget http://ncu.dl.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.bz2
+	2. tar -xjvf boost_1_57_0.tar.bz2 boost
+	3. cd boost
+	4. ./bootstrap.sh
+	5. ./b2 address-model=64 link=static threading=multi variant=release --stagedir=. cxxflags='-fPIC' cflags='-fPIC'
+	6. mv lib lib64_release
+
+
+
+6, 编译folly
+
+	
+7, 编译fbthrift
+
+
+9, proxygen
+	
