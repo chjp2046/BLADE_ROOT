@@ -1,3 +1,9 @@
+0. initializ system
+sudo yum install -y make zip unzip svn git autoconf libtool flex bison scons
+numactl-devel libsysfs-devel gettext gperf libcap-devel mailcap  glibc.i686
+libstdc++.i686 zlib.i686 zlib-devel.i686 lzma-devel
+
+
 1, ¸üÐÂpython
 
 yum groupinstall "Development tools"
