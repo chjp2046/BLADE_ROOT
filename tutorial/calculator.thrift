@@ -1,4 +1,5 @@
 namespace cpp example // The generated c++ code will be put inside example namespace
+namespace py example
 
 // Defines a service with name Calculator
 service Calculator {

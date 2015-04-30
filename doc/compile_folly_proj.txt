@@ -2,6 +2,7 @@
 sudo yum install -y make zip unzip svn git autoconf libtool flex bison scons
 numactl-devel libsysfs-devel gettext gperf libcap-devel mailcap  glibc.i686
 libstdc++.i686 zlib.i686 zlib-devel.i686 lzma-devel libgssapi-devel
+libaio-devel
 
 
 1, ¸üÐÂpython
