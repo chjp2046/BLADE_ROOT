@@ -5,7 +5,7 @@ libstdc++.i686 zlib.i686 zlib-devel.i686 lzma-devel libgssapi-devel
 libaio-devel
 
 
-1, 更新python
+1, 鏇存柊python
 
 yum groupinstall "Development tools"
 
@@ -19,7 +19,7 @@ cd Python-2.7.6
 make && make altinstall
 
 
-2, 更新yum
+2, 鏇存柊yum
 
 http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/gpgme-1.1.8-3.el6.x86_64.rpm
 http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/pygpgme-0.1-18.20090824bzr68.el6.x86_64.rpm
@@ -39,7 +39,7 @@ http://mirrors.ustc.edu.cn/centos/6/os/x86_64/Packages/yum-plugin-downloadonly-1
 
 rpm -Uvh --replacepkgs rpm-python*.rpm yum*.rpm
 
-3, 更新gcc
+3, 鏇存柊gcc
 https://gcc.gnu.org/wiki/InstallingGCC
 
 tar xzf gcc-4.6.2.tar.gz
@@ -53,13 +53,13 @@ make
 make install
 
 ----------------------
-报错 	/usr/bin/ld: crt1.o: No such file: No such file or directory
-解决方法
+鎶ラ敊 	/usr/bin/ld: crt1.o: No such file: No such file or directory
+瑙ｅ喅鏂规硶
 sudo ln -s /usr/lib/x86_64-linux-gnu /usr/lib64
 ../gcc-4.9.2/configure --prefix=/usr/local/gcc/4.9.2 --disable-multilib
 
 
-5. 安装boost
+5. 瀹夎boost
 
 	0. gcc version 4.9.2 (GCC) ; ldd (GNU libc) 2.12
 	1. wget http://ncu.dl.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.bz2
@@ -71,11 +71,26 @@ sudo ln -s /usr/lib/x86_64-linux-gnu /usr/lib64
 
 
 
-6, 编译folly
+6, 缂栬瘧folly
 
 	
-7, 编译fbthrift
+7, 缂栬瘧fbthrift
 
 
 9, proxygen
 	
+10, install bazel
+10.1 http://bazel.io/docs/install.html
+
+10.2 http://www.unixmen.com/install-oracle-java-jdk-8-centos-76-56-4/
+
+10.3 sudo yum install libarchive-devel pkgconfig zip gcc-g++ zlib-devel
+
+10.4 build
+
+bazel doesn't build on CentOS 6 -----https://github.com/google/bazel/issues/172
+
+10.5 export path
+export PATH="$PATH:$HOME/bazel/output"
+
+10.6 run
