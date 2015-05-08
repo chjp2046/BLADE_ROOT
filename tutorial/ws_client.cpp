@@ -66,6 +66,7 @@ public:
     VoidCallback errorCallback;
 };
 
+
 class WriteCallback : public AsyncTransportWrapper::WriteCallback {
 public:
     WriteCallback()
@@ -78,6 +79,11 @@ public:
         if (successCallback) {
             successCallback();
         }
+    }
+
+    void myWriteSucessCallback()
+    {
+        LOG(INFO)<<"write success: "<<bytesWritten;
     }
 
     void writeErr(size_t bytesWritten,
@@ -97,12 +103,16 @@ public:
     VoidCallback errorCallback;
 };
 
+WriteCallback wcb;
+
 class ReadCallback : public AsyncTransportWrapper::ReadCallback {
 public:
-    ReadCallback()
+    ReadCallback(folly::AsyncSSLSocket* sock)
         : state(STATE_WAITING)
         , exception(AsyncSocketException::UNKNOWN, "none")
-        , buffers() {}
+        , buffers() 
+        , _socket(sock)
+        , iTimes(0) {}
 
     ~ReadCallback() {
         for (vector<Buffer>::iterator it = buffers.begin();
@@ -135,12 +145,24 @@ public:
         std::string strData;
 
         size_t offset = 0;
-        for (size_t idx = 0; idx < buffers.size(); ++idx) {
+        for (size_t idx = 0; idx < buffers.size(); ++idx) 
+        {
             const auto& buf = buffers[idx];
             strData.append(buf.buffer, buf.length);
         }
         
-        LOG(INFO)<<"cur data:"<<strData;
+        LOG(INFO)<<"receive data:\n"<<strData;
+
+        buffers.clear();
+
+        if (++iTimes < 100)
+        {
+            _socket->write(&wcb, "hello", strlen("hello"));
+        }
+        else
+        {
+            _socket->close();
+        }
     }
 
     void readEOF() noexcept override {
@@ -192,6 +214,8 @@ public:
     vector<Buffer> buffers;
     Buffer currentBuffer;
     VoidCallback dataAvailableCallback;
+    folly::AsyncSSLSocket* _socket;
+    int iTimes;
 };
 
 static void SignalIntHandler(int sig)
@@ -206,7 +230,8 @@ int main(int argc, char* argv[]) {
 
     EventBase evb;
 
-    WriteCallback wcb;
+    
+    wcb.successCallback = std::bind(&WriteCallback::myWriteSucessCallback, &wcb);
     
     scoped_array<char> buf2(new char[10240]);
     memset(buf2.get(), '\0', 10240);
@@ -227,17 +252,19 @@ int main(int argc, char* argv[]) {
     folly::AsyncSSLSocket::UniquePtr socket(new folly::AsyncSSLSocket(ctx, &evb));
 
     ConnCallback ccb;
-    ccb.successCallback = [&] { LOG(INFO)<<"connect success"; socket->write(&wcb, buf2.get(), iLen); };
+    ccb.successCallback = [&] { LOG(INFO)<<"connect success, them write["<<iLen<<"]"; socket->write(&wcb, buf2.get(), iLen); };
 
-    //ReadCallback rcb;
-    //rcb.dataAvailableCallback = std::bind(&ReadCallback::processData, &rcb);
-    //socket->setReadCB(&rcb);
+
 
     folly::SocketAddress addr(FLAGS_ip, FLAGS_http_port);
 
     socket->connect(&ccb, addr, 1000);
 
     evb.loop();
-    
-    socket->close();
+
+    ReadCallback rcb(socket.get());
+    rcb.dataAvailableCallback = std::bind(&ReadCallback::processData, &rcb);
+    socket->setReadCB(&rcb);
+
+    evb.loop();
 }
