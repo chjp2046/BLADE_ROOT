@@ -82,11 +82,19 @@ sudo ln -s /usr/lib/x86_64-linux-gnu /usr/lib64
 10, install bazel
 10.1 http://bazel.io/docs/install.html
 
-10.2 http://www.unixmen.com/install-oracle-java-jdk-8-centos-76-56-4/
+10.2 install libarchive
 
-10.3 sudo yum install libarchive-devel pkgconfig zip gcc-g++ zlib-devel
+wget **
+tar -xzvf
+./configure --enable-static CPPFLAGS="-fPIC -DPIC -I/usr/local/include"
+LDFLAGS="-L/usr/local/lib"
+make && sudo make install
 
-10.4 build
+10.3 install jdk8 http://www.unixmen.com/install-oracle-java-jdk-8-centos-76-56-4/
+
+10.4 sudo yum install libarchive-devel pkgconfig zip gcc-g++ zlib-devel
+
+10.5 build
 
 bazel doesn't build on CentOS 6 -----https://github.com/google/bazel/issues/172
 
