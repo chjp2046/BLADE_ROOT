@@ -6,7 +6,8 @@
 #include "./apns_svr/ApnsSvr.pb.h"
 #include "poppy/rpc_server.h"
 #include "common/base/stdext/hash_map.h"
-    std::unordered_map use set to save server index
+    std::unordered_map use set to save server index 
+    https://github.com/facebook/folly/blob/master/folly/docs/AtomicHashMap.md
 #include "poppy/rpc_channel.h"
 #include "poppy/rpc_client.h"
 #include "common/system/concurrency/share_memory.h"
