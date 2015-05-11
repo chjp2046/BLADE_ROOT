@@ -77,7 +77,7 @@ cc_binary(
 	name = "ws_client",
 	srcs = [
 		'ws_client.cpp',
-        'WebSocket.cpp'
+        'WebSocketClient.cpp'
 	],
 	deps = [
 		'//folly:folly'

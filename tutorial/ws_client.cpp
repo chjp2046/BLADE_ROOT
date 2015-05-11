@@ -12,7 +12,7 @@
 #include <iostream>
 #include <signal.h>
 
-#include "WebSocket.h"
+#include "WebSocketClient.h"
 
 using namespace boost;
 using namespace folly;
@@ -24,7 +24,6 @@ using std::endl;
 using std::unique_ptr;
 using std::chrono::milliseconds;
 using boost::scoped_array;
-using example::WebSocket;
 
 bool bQuit = true;
 
@@ -36,6 +35,10 @@ enum StateEnum {
 
 DEFINE_int32(http_port, 11000, "Port to listen on with HTTP protocol");
 DEFINE_string(ip, "localhost", "IP/Hostname to bind to");
+
+#if 0
+./ws_client --logtostderr=1 --ip=127.0.0.1
+#endif
 
 typedef std::function<void()> VoidCallback;
 
@@ -151,13 +154,25 @@ public:
             strData.append(buf.buffer, buf.length);
         }
         
-        LOG(INFO)<<"receive data:\n"<<strData;
+        LOG(INFO)<<"receive data:\n"<<strData<<"size: "<<strData.size();
 
         buffers.clear();
 
         if (++iTimes < 100)
         {
-            _socket->write(&wcb, "hello", strlen("hello"));
+            scoped_array<char> buf2(new char[2048]);
+            memset(buf2.get(), '\0', 2048);
+
+            size_t ret_len = example::WebSocketClient::makeFrame(example::TEXT, "hello", strlen("hello"), buf2.get(), 2048);
+            if (ret_len == 0)
+            {
+                LOG(INFO)<<"error frame";
+                _socket->close();
+            }
+            else
+            {
+                _socket->write(&wcb, buf2.get(), ret_len);
+            }
         }
         else
         {
@@ -233,13 +248,13 @@ int main(int argc, char* argv[]) {
     
     wcb.successCallback = std::bind(&WriteCallback::myWriteSucessCallback, &wcb);
     
-    scoped_array<char> buf2(new char[10240]);
-    memset(buf2.get(), '\0', 10240);
+    scoped_array<char> buf2(new char[2048]);
+    memset(buf2.get(), '\0', 2048);
     size_t iLen = 0;
 
-    WebSocket ws_codec;
-    example::WebSocketFrameType type = ws_codec.makeHandshakeRequest("127.0.0.1", "", "test_key", buf2.get(), 10240, &iLen);
-    if (type == example::ERROR_FRAME)
+    example::WebSocketClient ws_codec;
+    example::FrameType type = ws_codec.makeHandshakeRequest("127.0.0.1", "", "test_key", buf2.get(), 2048, &iLen);
+    if (type == example::ERROR)
     {
         LOG(INFO)<<"error frame";
         return 1;

@@ -30,7 +30,6 @@ namespace EchoService {
 
     void EchoHandler::onBody(std::unique_ptr<folly::IOBuf> body) noexcept {
         if(websocket_) {
-            LOG(INFO)<<__FUNCTION__;
             websocket_->processData(std::move(body));
         }
         else {
@@ -55,7 +54,6 @@ namespace EchoService {
 
     void EchoHandler::onWebSocketFrame(std::unique_ptr<proxygen::WebSocketFrame> frame) 
     {
-        LOG(INFO)<<__FUNCTION__;
         websocket_->sendFrame(frame->frameType, std::move(frame->payload), frame->endOfMessage);
     }
 
