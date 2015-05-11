@@ -147,14 +147,22 @@ public:
     {
         std::string strData;
 
-        size_t offset = 0;
         for (size_t idx = 0; idx < buffers.size(); ++idx) 
         {
             const auto& buf = buffers[idx];
             strData.append(buf.buffer, buf.length);
         }
         
-        LOG(INFO)<<"receive data:\n"<<strData<<"size: "<<strData.size();
+        const char* out_buffer = NULL;
+        size_t out_length = 0;
+        example::FrameType frame_type = example::WebSocketClient::getFrame(strData.c_str(), strData.size(), &out_buffer, &out_length);
+        if (frame_type == example::CONTINUE)
+        {
+            return;
+        }
+        
+
+        LOG(INFO)<<"src length:"<<strData.size()<<", frame type:"<<std::hex<<frame_type<<std::dec<<", payload:"<<string(out_buffer, out_length)<<", out_length:"<<out_length;
 
         buffers.clear();
 
@@ -163,7 +171,12 @@ public:
             scoped_array<char> buf2(new char[2048]);
             memset(buf2.get(), '\0', 2048);
 
-            size_t ret_len = example::WebSocketClient::makeFrame(example::TEXT, "hello", strlen("hello"), buf2.get(), 2048);
+            std::cout<<"please input text to send to server:"<<std::endl;
+
+            std::string strInput;
+            std::cin>>strInput;
+
+            size_t ret_len = example::WebSocketClient::makeFrame(example::TEXT, strInput.c_str(), strInput.size(), buf2.get(), 2048);
             if (ret_len == 0)
             {
                 LOG(INFO)<<"error frame";
@@ -254,7 +267,7 @@ int main(int argc, char* argv[]) {
 
     example::WebSocketClient ws_codec;
     example::FrameType type = ws_codec.makeHandshakeRequest("127.0.0.1", "", "test_key", buf2.get(), 2048, &iLen);
-    if (type == example::ERROR)
+    if (type == example::ERROR_FRAME)
     {
         LOG(INFO)<<"error frame";
         return 1;

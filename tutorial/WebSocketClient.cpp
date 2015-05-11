@@ -20,7 +20,6 @@ namespace example
 #define WEBSOCKET_INITIAL_HEADER_LENGTH 2
 #define WEBSOCKET_LEN16_LENGTH 4
 #define WEBSOCKET_LEN64_LENGTH 10
-
 #define WEBSOCKET_LEN16_CODE 126
 #define WEBSOCKET_LEN64_CODE 127
 
@@ -30,7 +29,7 @@ WebSocketClient::WebSocketClient() {
 }
 
 
-size_t WebSocketClient::makeFrame(FrameType frame_type, char* msg, size_t msg_length, char* buffer, size_t buffer_size)
+size_t WebSocketClient::makeFrame(FrameType frame_type, const char* msg, size_t msg_length, char* buffer, size_t buffer_size)
 {
     uint8_t header[10];
     size_t headerLength;
@@ -64,9 +63,39 @@ size_t WebSocketClient::makeFrame(FrameType frame_type, char* msg, size_t msg_le
     }
 }
 
-FrameType WebSocketClient::getFrame(unsigned char* in_buffer, size_t in_length, unsigned char* out_buffer, size_t out_size, size_t* out_length)
+FrameType WebSocketClient::getFrame(const char* in_buffer, size_t in_length, const char** out_buffer, size_t* out_length)
 {
-    return TEXT;
+    if (in_length < 3)
+    {
+        return CONTINUE;
+    }
+
+    uint8_t iLengthType = in_buffer[1];
+    size_t frame_length = 0;
+    if (iLengthType < WEBSOCKET_LEN16_CODE)
+    {
+        frame_length = in_buffer[1];
+        *out_buffer = in_buffer + 2;
+    }
+    else if (iLengthType == WEBSOCKET_LEN16_CODE)
+    {
+        frame_length = ntohs(*reinterpret_cast<const uint16_t*>(in_buffer + 2));
+        *out_buffer = in_buffer + 2 + sizeof(uint16_t);
+    }
+    else
+    {
+        frame_length = be64toh(*reinterpret_cast<const uint64_t*>(in_buffer + 2));
+        *out_buffer = in_buffer + 2 + sizeof(uint64_t);
+    }
+
+    if (in_length < frame_length)
+    {
+        return CONTINUE;
+    }
+
+    *out_length = frame_length;
+
+    return static_cast<FrameType>(in_buffer[0] & 0x0f);
 }
 
 /*
@@ -82,7 +111,7 @@ FrameType WebSocketClient::makeHandshakeRequest(const std::string& strHost, cons
 {
     if (strHost.empty() || ws_key.empty())
     {
-        return ERROR;
+        return ERROR_FRAME;
     }
 
     this->host = strHost;

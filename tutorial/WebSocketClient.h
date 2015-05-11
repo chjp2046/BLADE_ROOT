@@ -26,7 +26,7 @@ enum FrameType
     CLOSE = 0x08,
     PING = 0x09,
     PONG = 0x0A,
-    ERROR = 0x5A
+    ERROR_FRAME = 0x5A
 };
 
 class WebSocketClient
@@ -43,9 +43,9 @@ class WebSocketClient
 
     FrameType makeHandshakeRequest(const std::string& strHost, const std::string strOrigin, const std::string& ws_key, char* out_buffer, size_t out_size, size_t* out_length);
 
-	static size_t makeFrame(FrameType frame_type, char* msg, size_t msg_len, char* buffer, size_t buffer_len);
+	static size_t makeFrame(FrameType frame_type, const char* msg, size_t msg_len, char* buffer, size_t buffer_len);
 
-	static FrameType getFrame(unsigned char* in_buffer, size_t in_length, unsigned char* out_buffer, size_t out_size, size_t* out_length);
+	static FrameType getFrame(const char* in_buffer, size_t in_length, const char** out_buffer, size_t* out_length);
 };
 
 }
