@@ -64,8 +64,84 @@ int64_t CalculatorSvNull::add(int32_t num1, int32_t num2) {
   return 0;
 }
 
-std::string CalculatorAsyncProcessor::getServiceName() {
+const char* CalculatorAsyncProcessor::getServiceName() {
   return "Calculator";
+}
+
+folly::Optional<std::string> CalculatorAsyncProcessor::getCacheKey(folly::IOBuf* buf, apache::thrift::protocol::PROTOCOL_TYPES protType) {
+  std::string fname;
+  apache::thrift::MessageType mtype;
+  int32_t protoSeqId = 0;
+  std::string pname;
+  apache::thrift::protocol::TType ftype;
+  int16_t fid;
+  try {
+    switch(protType) {
+      case apache::thrift::protocol::T_BINARY_PROTOCOL:
+      {
+        std::unique_ptr<apache::thrift::BinaryProtocolReader> iprot(new apache::thrift::BinaryProtocolReader());
+        iprot->setInput(buf);
+        iprot->readMessageBegin(fname, mtype, protoSeqId);
+        auto pfn = CacheKeyMap.find(fname);
+        if (pfn == CacheKeyMap.end()) {
+          return folly::none;
+        }
+        auto cacheKeyParamId = pfn->second;
+        uint32_t xfer = 0;
+        xfer += iprot->readStructBegin(pname);
+        while(true) {
+          xfer += iprot->readFieldBegin(pname, ftype, fid);
+          if (ftype == apache::thrift::protocol::T_STOP) {
+            break;
+          }
+          if (fid == cacheKeyParamId) {
+            std::string cacheKey;
+            iprot->readString(cacheKey);
+            return folly::Optional<std::string>(std::move(cacheKey));
+          }
+          xfer += iprot->skip(ftype);
+          xfer += iprot->readFieldEnd();
+        }
+        return folly::none;
+      }
+      case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+      {
+        std::unique_ptr<apache::thrift::CompactProtocolReader> iprot(new apache::thrift::CompactProtocolReader());
+        iprot->setInput(buf);
+        iprot->readMessageBegin(fname, mtype, protoSeqId);
+        auto pfn = CacheKeyMap.find(fname);
+        if (pfn == CacheKeyMap.end()) {
+          return folly::none;
+        }
+        auto cacheKeyParamId = pfn->second;
+        uint32_t xfer = 0;
+        xfer += iprot->readStructBegin(pname);
+        while(true) {
+          xfer += iprot->readFieldBegin(pname, ftype, fid);
+          if (ftype == apache::thrift::protocol::T_STOP) {
+            break;
+          }
+          if (fid == cacheKeyParamId) {
+            std::string cacheKey;
+            iprot->readString(cacheKey);
+            return folly::Optional<std::string>(std::move(cacheKey));
+          }
+          xfer += iprot->skip(ftype);
+          xfer += iprot->readFieldEnd();
+        }
+        return folly::none;
+      }
+      default:
+      {
+        return folly::none;
+        break;
+      }
+    }
+  } catch(const std::exception& e) {
+    LOG(ERROR) << "Caught an exception parsing buffer:" << e.what();
+    return folly::none;
+  }
+  return folly::none;
 }
 
 void CalculatorAsyncProcessor::process(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType,apache::thrift::Cpp2RequestContext* context,apache::thrift::async::TEventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
@@ -268,6 +344,7 @@ bool CalculatorAsyncProcessor::isOnewayMethod(const folly::IOBuf* buf, const apa
 }
 
 std::unordered_set<std::string> CalculatorAsyncProcessor::onewayMethods {};
+std::unordered_map<std::string, int16_t> CalculatorAsyncProcessor::CacheKeyMap {};
 CalculatorAsyncProcessor::binaryProcessMap CalculatorAsyncProcessor::binaryProcessMap_ {
   {"add", &CalculatorAsyncProcessor::_processInThread_add<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}
 };

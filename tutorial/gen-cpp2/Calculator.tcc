@@ -51,7 +51,7 @@ void CalculatorAsyncProcessor::process_add(std::unique_ptr<apache::thrift::Respo
       LOG(ERROR) << ex.what() << " in oneway function add";
     }
   }
-  std::unique_ptr<apache::thrift::HandlerCallback<int64_t>> callback(new apache::thrift::HandlerCallback<int64_t>(std::move(req), std::move(c), return_add<ProtocolIn_,ProtocolOut_>, throw_add<ProtocolIn_, ProtocolOut_>, throw_wrapped_add<ProtocolIn_, ProtocolOut_>, iprot->getSeqId(), eb, tm, ctx));
+  auto callback = folly::make_unique<apache::thrift::HandlerCallback<int64_t>>(std::move(req), std::move(c), return_add<ProtocolIn_,ProtocolOut_>, throw_add<ProtocolIn_, ProtocolOut_>, throw_wrapped_add<ProtocolIn_, ProtocolOut_>, iprot->getSeqId(), eb, tm, ctx);
   if (!callback->isRequestActive()) {
     callback.release()->deleteInThread();
     return;
@@ -61,16 +61,16 @@ void CalculatorAsyncProcessor::process_add(std::unique_ptr<apache::thrift::Respo
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue CalculatorAsyncProcessor::return_add(int32_t protoSeqId, std::unique_ptr<apache::thrift::ContextStack> ctx, int64_t const& _return) {
+folly::IOBufQueue CalculatorAsyncProcessor::return_add(int32_t protoSeqId, apache::thrift::ContextStack* ctx, int64_t const& _return) {
   ProtocolOut_ prot;
   Calculator_add_presult result;
   result.success = const_cast<int64_t*>(&_return);
   result.__isset.success = true;
-  return serializeResponse("add", &prot, protoSeqId, ctx.get(), result);
+  return serializeResponse("add", &prot, protoSeqId, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void CalculatorAsyncProcessor::throw_add(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,std::unique_ptr<apache::thrift::ContextStack> ctx,std::exception_ptr ep,apache::thrift::Cpp2RequestContext* reqCtx) {
+void CalculatorAsyncProcessor::throw_add(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,std::exception_ptr ep,apache::thrift::Cpp2RequestContext* reqCtx) {
   ProtocolOut_ prot;
   try {
     std::rethrow_exception(ep);
@@ -79,8 +79,8 @@ void CalculatorAsyncProcessor::throw_add(std::unique_ptr<apache::thrift::Respons
     if (req) {
       LOG(ERROR) << folly::exceptionStr(e).toStdString() << " in function add";
       apache::thrift::TApplicationException x(folly::exceptionStr(e).toStdString());
-      ctx->userException(folly::demangle(typeid(e)).toStdString());
-      folly::IOBufQueue queue = serializeException("add", &prot, protoSeqId, ctx.get(), x);
+      ctx->userException(folly::demangle(typeid(e)).toStdString(), e.what());
+      folly::IOBufQueue queue = serializeException("add", &prot, protoSeqId, ctx, x);
       queue.append(apache::thrift::transport::THeader::transform(queue.move(), reqCtx->getTransforms(), reqCtx->getMinCompressBytes()));
       req->sendReply(queue.move());
       return;
@@ -105,7 +105,7 @@ void CalculatorAsyncProcessor::throw_add(std::unique_ptr<apache::thrift::Respons
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void CalculatorAsyncProcessor::throw_wrapped_add(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,std::unique_ptr<apache::thrift::ContextStack> ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void CalculatorAsyncProcessor::throw_wrapped_add(std::unique_ptr<apache::thrift::ResponseChannel::Request> req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
@@ -114,8 +114,8 @@ void CalculatorAsyncProcessor::throw_wrapped_add(std::unique_ptr<apache::thrift:
     if (req) {
       LOG(ERROR) << ew.what().toStdString() << " in function add";
       apache::thrift::TApplicationException x(ew.what().toStdString());
-      ctx->userException(ew.class_name().toStdString());
-      folly::IOBufQueue queue = serializeException("add", &prot, protoSeqId, ctx.get(), x);
+      ctx->userException(ew.class_name().toStdString(), ew.what().toStdString());
+      folly::IOBufQueue queue = serializeException("add", &prot, protoSeqId, ctx, x);
       queue.append(apache::thrift::transport::THeader::transform(queue.move(), reqCtx->getTransforms(), reqCtx->getMinCompressBytes()));
       req->sendReply(queue.move());
       return;

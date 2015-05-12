@@ -8,12 +8,9 @@
 
 #include "Calculator.tcc"
 
-#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
-#include <thrift/lib/cpp2/protocol/VirtualProtocol.h>
-
 namespace example { namespace cpp2 {
 
-std::string CalculatorAsyncClient::getServiceName() {
+const char* CalculatorAsyncClient::getServiceName() {
   return "Calculator";
 }
 
@@ -62,14 +59,6 @@ int64_t CalculatorAsyncClient::sync_add(const apache::thrift::RpcOptions& rpcOpt
   return recv_add(_returnState);
 }
 
-void CalculatorAsyncClient::add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
-  add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
-}
-
-void CalculatorAsyncClient::functor_add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
-  add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
-}
-
 folly::Future<int64_t> CalculatorAsyncClient::future_add(int32_t num1, int32_t num2) {
   return future_add(::apache::thrift::RpcOptions(), num1, num2);
 }
@@ -80,6 +69,14 @@ folly::Future<int64_t> CalculatorAsyncClient::future_add(const apache::thrift::R
   std::unique_ptr<apache::thrift::RequestCallback> callback6(new apache::thrift::FutureCallback<int64_t>(std::move(promise4), recv_wrapped_add));
   add(rpcOptions, std::move(callback6), num1, num2);
   return std::move(future5);
+}
+
+void CalculatorAsyncClient::add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
+  add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
+}
+
+void CalculatorAsyncClient::functor_add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
+  add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
 }
 
 folly::exception_wrapper CalculatorAsyncClient::recv_wrapped_add(int64_t& _return, ::apache::thrift::ClientReceiveState& state) {
@@ -133,8 +130,6 @@ template uint32_t Calculator_add_pargs::read<apache::thrift::CompactProtocolRead
 template uint32_t Calculator_add_pargs::write<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Calculator_add_pargs::serializedSize<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Calculator_add_pargs::serializedSizeZC<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Calculator_add_pargs::write<apache::thrift::DebugProtocolWriter>(apache::thrift::DebugProtocolWriter*) const;
-template uint32_t Calculator_add_pargs::read<apache::thrift::VirtualReaderBase>(apache::thrift::VirtualReaderBase*);
 template uint32_t Calculator_add_presult::read<apache::thrift::BinaryProtocolReader>(apache::thrift::BinaryProtocolReader*);
 template uint32_t Calculator_add_presult::write<apache::thrift::BinaryProtocolWriter>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t Calculator_add_presult::serializedSize<apache::thrift::BinaryProtocolWriter>(apache::thrift::BinaryProtocolWriter*) const;
@@ -143,8 +138,6 @@ template uint32_t Calculator_add_presult::read<apache::thrift::CompactProtocolRe
 template uint32_t Calculator_add_presult::write<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Calculator_add_presult::serializedSize<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Calculator_add_presult::serializedSizeZC<apache::thrift::CompactProtocolWriter>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t Calculator_add_presult::write<apache::thrift::DebugProtocolWriter>(apache::thrift::DebugProtocolWriter*) const;
-template uint32_t Calculator_add_presult::read<apache::thrift::VirtualReaderBase>(apache::thrift::VirtualReaderBase*);
 }} // example::cpp2
 namespace apache { namespace thrift {
 

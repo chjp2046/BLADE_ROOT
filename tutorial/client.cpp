@@ -1,4 +1,5 @@
 #include "gen-cpp2/Calculator.h" // From generated code
+#include "thrift/lib/cpp2/async/HeaderClientChannel.h"
 #include <iostream>
 
 using namespace std;

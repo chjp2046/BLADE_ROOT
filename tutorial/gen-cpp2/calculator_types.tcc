@@ -12,9 +12,6 @@
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
-#include <thrift/lib/cpp2/protocol/VirtualProtocol.h>
-
 namespace example { namespace cpp2 {
 
 }} // example::cpp2

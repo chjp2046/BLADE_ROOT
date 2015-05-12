@@ -153,6 +153,8 @@ class add_args:
   """
 
   thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
   __init__ = None
   @staticmethod
   def isUnion():
@@ -232,6 +234,11 @@ add_args.thrift_spec = (
   (2, TType.I32, 'num2', None, None, 2, ), # 2
 )
 
+add_args.thrift_struct_annotations = {
+}
+add_args.thrift_field_annotations = {
+}
+
 def add_args__init__(self, num1=None, num2=None,):
   self.num1 = num1
   self.num2 = num2
@@ -245,6 +252,8 @@ class add_result:
   """
 
   thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
   __init__ = None
   @staticmethod
   def isUnion():
@@ -312,6 +321,11 @@ all_structs.append(add_result)
 add_result.thrift_spec = (
   (0, TType.I64, 'success', None, None, 2, ), # 0
 )
+
+add_result.thrift_struct_annotations = {
+}
+add_result.thrift_field_annotations = {
+}
 
 def add_result__init__(self, success=None,):
   self.success = success
