@@ -1,7 +1,10 @@
+https://github.com/facebook/folly/blob/master/folly/docs/Overview.md
+
 #include "common/system/concurrency/blocking_queue.h"
      folly/folly/wangle/concurrent/BlockingQueue.h
 #include "LogicSvr.pb.h"
 #include "./common/CGlobalConfiger.h"
+    folly/folly/Singleton.cpp
 #include "SmsSvr.pb.h"
 #include "./apns_svr/ApnsSvr.pb.h"
 #include "poppy/rpc_server.h"
@@ -30,9 +33,11 @@
 #include "thirdparty/glog/logging.h"
 #include "common/cftcomm/exception.h"
 #include "common/base/string/algorithm.h"
+    boost/algorithm
 #include "common/base/string/string_number.h"
      https://github.com/facebook/folly/blob/master/folly/docs/Conv.md
 #include "common/crypto/random/true_random.h"
+ folly/folly/Random.cpp
 #include "common/system/time/time_t.h"
 #include "common/cftcomm/mysql_pool.h"
 #include "UserSession.pb.h"
@@ -43,17 +48,23 @@
 #include <new>
 #include <libgen.h>
 #include "common/system/concurrency/thread_pool.h"
+    folly/folly/wangle/concurrent/
 #include "common/encoding/base64.h"
+    http://stackoverflow.com/questions/7053538/how-do-i-encode-a-string-to-base64-using-only-boost
 #include "common/system/concurrency/thread_local.h"
+     folly/folly/ThreadLocal.h
 #include "thirdparty/zlib/zlib.h"
 #include <arpa/inet.h>
 #include "common/encoding/hex.h"
+    boost/algorithm
 #include "LogicServer.h"
 #include "Bemetoy.pb.h"
 #include "thirdparty/glog/logging.h"
 #include "common/cftcomm/exception.h"
 #include "common/base/string/algorithm.h"
+    boost/algorithm
 #include "common/base/string/string_number.h"
+    folly/conv
 #include "thirdparty/jsoncpp/json.h"
 #include "common/system/concurrency/thread_pool.h"
 #include "common/cftcomm/mysql_pool.h"
