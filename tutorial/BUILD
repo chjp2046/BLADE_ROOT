@@ -12,7 +12,6 @@ cc_binary(
 	extra_cppflags = [
 		'-std=gnu++0x'
 	],
-    warning = 'no'
 )
 
 cc_binary(
@@ -30,7 +29,6 @@ cc_binary(
 	extra_cppflags = [
 		'-std=gnu++0x'
 	],
-    warning = 'no'
 )
 
 cc_binary(
@@ -48,7 +46,6 @@ cc_binary(
 	extra_cppflags = [
 		'-std=gnu++0x'
 	],
-    warning = 'no'
 )
 
 
@@ -69,7 +66,6 @@ cc_binary(
 		'-fPIC',
 		'-DPIC'
 	],
-	warning = 'no'
 )
 
 
@@ -85,5 +81,4 @@ cc_binary(
 	extra_cppflags = [
         '-std=gnu++0x'
 	],
-    warning = 'no'
 )
