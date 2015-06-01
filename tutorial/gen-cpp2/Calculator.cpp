@@ -17,27 +17,19 @@ std::unique_ptr<apache::thrift::AsyncProcessor> CalculatorSvIf::getProcessor() {
   return std::unique_ptr<apache::thrift::AsyncProcessor>(new CalculatorAsyncProcessor((CalculatorSvIf*)this));
 }
 
-apache::thrift::concurrency::PriorityThreadManager::PRIORITY CalculatorSvIf::getprio_add(apache::thrift::Cpp2RequestContext* reqCtx) {
-  apache::thrift::concurrency::PRIORITY prio0 = reqCtx->getCallPriority();
-  if (prio0 != apache::thrift::concurrency::N_PRIORITIES) {
-    return prio0;
-  }
-  return apache::thrift::concurrency::NORMAL;
-}
-
 int64_t CalculatorSvIf::add(int32_t num1, int32_t num2) {
   throw apache::thrift::TApplicationException("Function add is unimplemented");
   return 0;
 }
 
 folly::Future<int64_t> CalculatorSvIf::future_add(int32_t num1, int32_t num2) {
-  folly::Promise<int64_t> promise1;
+  folly::Promise<int64_t> promise0;
   try {
-    promise1.setValue(add(num1, num2));
+    promise0.setValue(add(num1, num2));
   } catch(const std::exception& ex) {
-    promise1.setException(folly::exception_wrapper(std::current_exception()));
+    promise0.setException(folly::exception_wrapper(std::current_exception()));
   }
-  return promise1.getFuture();
+  return promise0.getFuture();
 }
 
 void CalculatorSvIf::async_tm_add(std::unique_ptr<apache::thrift::HandlerCallback<int64_t>> callback, int32_t num1, int32_t num2) {
@@ -46,8 +38,8 @@ void CalculatorSvIf::async_tm_add(std::unique_ptr<apache::thrift::HandlerCallbac
   setThreadManager(callbackp->getThreadManager());
   setConnectionContext(callbackp->getConnectionContext());
   try {
-    auto future2 = future_add(num1, num2);
-    future2.then([=](folly::Try<int64_t>&& _return) {
+    auto future1 = future_add(num1, num2);
+    future1.then([=](folly::Try<int64_t>&& _return) {
       try {
         callbackp->resultInThread(std::move(_return.value()));
       } catch(...) {

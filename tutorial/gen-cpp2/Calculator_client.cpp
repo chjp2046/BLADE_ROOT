@@ -8,6 +8,8 @@
 
 #include "Calculator.tcc"
 
+#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 namespace example { namespace cpp2 {
 
 const char* CalculatorAsyncClient::getServiceName() {
@@ -15,14 +17,11 @@ const char* CalculatorAsyncClient::getServiceName() {
 }
 
 void CalculatorAsyncClient::add(std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
-  add(::apache::thrift::RpcOptions(), std::move(callback), num1, num2);
+  ::apache::thrift::RpcOptions rpcOptions;
+  add(rpcOptions, std::move(callback), num1, num2);
 }
 
-void CalculatorAsyncClient::callback_add(std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
-  add(::apache::thrift::RpcOptions(), std::move(callback), num1, num2);
-}
-
-void CalculatorAsyncClient::add(const apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
+void CalculatorAsyncClient::add(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
   switch(getChannel()->getProtocolId()) {
     case apache::thrift::protocol::T_BINARY_PROTOCOL:
     {
@@ -44,13 +43,14 @@ void CalculatorAsyncClient::add(const apache::thrift::RpcOptions& rpcOptions, st
 }
 
 int64_t CalculatorAsyncClient::sync_add(int32_t num1, int32_t num2) {
-  return sync_add(::apache::thrift::RpcOptions(), num1, num2);
+  ::apache::thrift::RpcOptions rpcOptions;
+  return sync_add(rpcOptions, num1, num2);
 }
 
-int64_t CalculatorAsyncClient::sync_add(const apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2) {
+int64_t CalculatorAsyncClient::sync_add(apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2) {
   apache::thrift::ClientReceiveState _returnState;
-  std::unique_ptr<apache::thrift::RequestCallback> callback3(new apache::thrift::ClientSyncCallback(&_returnState, getChannel()->getEventBase(), false));
-  add(rpcOptions, std::move(callback3), num1, num2);
+  std::unique_ptr<apache::thrift::RequestCallback> callback2(new apache::thrift::ClientSyncCallback(&_returnState, getChannel()->getEventBase(), false));
+  add(rpcOptions, std::move(callback2), num1, num2);
   getChannel()->getEventBase()->loopForever();
   if (!_returnState.buf()) {
     assert(_returnState.exception());
@@ -60,22 +60,19 @@ int64_t CalculatorAsyncClient::sync_add(const apache::thrift::RpcOptions& rpcOpt
 }
 
 folly::Future<int64_t> CalculatorAsyncClient::future_add(int32_t num1, int32_t num2) {
-  return future_add(::apache::thrift::RpcOptions(), num1, num2);
+  ::apache::thrift::RpcOptions rpcOptions;
+  return future_add(rpcOptions, num1, num2);
 }
 
-folly::Future<int64_t> CalculatorAsyncClient::future_add(const apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2) {
-  folly::Promise<int64_t> promise4;
-  auto future5 = promise4.getFuture();
-  std::unique_ptr<apache::thrift::RequestCallback> callback6(new apache::thrift::FutureCallback<int64_t>(std::move(promise4), recv_wrapped_add));
-  add(rpcOptions, std::move(callback6), num1, num2);
-  return std::move(future5);
+folly::Future<int64_t> CalculatorAsyncClient::future_add(apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2) {
+  folly::Promise<int64_t> promise3;
+  auto future4 = promise3.getFuture();
+  std::unique_ptr<apache::thrift::RequestCallback> callback5(new apache::thrift::FutureCallback<int64_t>(std::move(promise3), recv_wrapped_add));
+  add(rpcOptions, std::move(callback5), num1, num2);
+  return std::move(future4);
 }
 
 void CalculatorAsyncClient::add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
-  add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
-}
-
-void CalculatorAsyncClient::functor_add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2) {
   add(std::unique_ptr<apache::thrift::RequestCallback>(new apache::thrift::FunctionReplyCallback(std::move(callback))),num1,num2);
 }
 

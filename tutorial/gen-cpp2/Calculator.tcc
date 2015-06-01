@@ -7,14 +7,18 @@
 #pragma once
 
 #include "Calculator.h"
-
 #include <thrift/lib/cpp/TApplicationException.h>
+#include <folly/MoveWrapper.h>
+#include <folly/io/IOBuf.h>
+#include <folly/io/IOBufQueue.h>
+#include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/server/Cpp2ConnContext.h>
 
 namespace example { namespace cpp2 {
 
 template <typename ProtocolIn_, typename ProtocolOut_>
 void CalculatorAsyncProcessor::_processInThread_add(std::unique_ptr<apache::thrift::ResponseChannel::Request> req, std::unique_ptr<folly::IOBuf> buf, std::unique_ptr<ProtocolIn_> iprot, apache::thrift::Cpp2RequestContext* ctx, apache::thrift::async::TEventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  auto pri = iface_->getprio_add(ctx);
+  auto pri = iface_->getRequestPriority(ctx, apache::thrift::concurrency::NORMAL);
   processInThread<ProtocolIn_, ProtocolOut_>(std::move(req), std::move(buf),std::move(iprot), ctx, eb, tm, pri, false, &CalculatorAsyncProcessor::process_add<ProtocolIn_, ProtocolOut_>, this);
 }
 
@@ -127,43 +131,12 @@ void CalculatorAsyncProcessor::throw_wrapped_add(std::unique_ptr<apache::thrift:
 }
 
 template <typename Protocol_>
-void CalculatorAsyncClient::addT(Protocol_* prot, const apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
+void CalculatorAsyncClient::addT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2) {
   std::unique_ptr<apache::thrift::ContextStack> ctx = this->getContextStack(this->getServiceName(), "Calculator.add", connectionContext_.get());
   Calculator_add_pargs args;
   args.num1 = &num1;
   args.num2 = &num2;
-  size_t bufSize = args.serializedSizeZC(prot);
-  bufSize += prot->serializedMessageSize("add");
-  folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
-  prot->setOutput(&queue, bufSize);
-  auto guard = folly::makeGuard([&]{prot->setOutput(nullptr);});
-  try {
-    ctx->preWrite();
-    prot->writeMessageBegin("add", apache::thrift::T_CALL, 0);
-    args.write(prot);
-    prot->writeMessageEnd();
-    ::apache::thrift::SerializedMessage smsg;
-    smsg.protocolType = prot->protocolType();
-    smsg.buffer = queue.front();
-    ctx->onWriteData(smsg);
-    ctx->postWrite(queue.chainLength());
-  } catch(apache::thrift::TException &ex) {
-    ctx->handlerError();
-    throw;
-  }
-  auto eb = this->channel_->getEventBase();
-  if(!eb || eb->isInEventBaseThread()) {
-    this->channel_->sendRequest(rpcOptions, std::move(callback), std::move(ctx), queue.move());
-  }
-  else {
-    auto mvCb = folly::makeMoveWrapper(std::move(callback));
-    auto mvCtx = folly::makeMoveWrapper(std::move(ctx));
-    auto mvBuf = folly::makeMoveWrapper(queue.move());
-    eb->runInEventBaseThread([this, rpcOptions, mvCb, mvCtx, mvBuf] () mutable {
-      this->channel_->sendRequest(rpcOptions, std::move(*mvCb), std::move(*mvCtx), std::move(*mvBuf));
-    }
-    );
-  }
+  apache::thrift::clientSendT<false>(prot, rpcOptions, std::move(callback), std::move(ctx), channel_.get(), args, "add", [](Protocol_* prot, Calculator_add_pargs& args) { args.write(prot); }, [](Protocol_* prot, Calculator_add_pargs& args) { return args.serializedSizeZC(prot); });
 }
 
 template <typename Protocol_>

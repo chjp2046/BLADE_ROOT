@@ -11,10 +11,19 @@
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 #include <folly/futures/Future.h>
 #include "calculator_types.h"
-#include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 
 
+
+namespace folly {
+  class IOBuf;
+  class IOBufQueue;
+}
+namespace apache { namespace thrift {
+  class Cpp2RequestContext;
+  class BinaryProtocolReader;
+  class CompactProtocolReader;
+  namespace transport { class THeader; }
+}}
 
 namespace example { namespace cpp2 {
 
@@ -34,7 +43,6 @@ class CalculatorSvIf : public CalculatorSvAsyncIf, public apache::thrift::Server
 
   virtual ~CalculatorSvIf() {}
   virtual std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor();
-  apache::thrift::concurrency::PriorityThreadManager::PRIORITY getprio_add(apache::thrift::Cpp2RequestContext* reqCtx);
   virtual int64_t add(int32_t num1, int32_t num2);
   folly::Future<int64_t> future_add(int32_t num1, int32_t num2);
   virtual void async_tm_add(std::unique_ptr<apache::thrift::HandlerCallback<int64_t>> callback, int32_t num1, int32_t num2);
@@ -89,28 +97,26 @@ class CalculatorAsyncClient : public apache::thrift::TClientBase {
 
   CalculatorAsyncClient(std::shared_ptr<apache::thrift::RequestChannel> channel) :
       channel_(channel) {
-    connectionContext_ = std::unique_ptr<TClientBase::ConnContext>(new TClientBase::ConnContext(channel_->getHeader(),nullptr));
+    connectionContext_.reset(new apache::thrift::Cpp2ConnContext(nullptr, nullptr, channel_->getHeader(), nullptr, nullptr));
   }
 
   apache::thrift::RequestChannel*  getChannel() {
     return this->channel_.get();
   }
   virtual void add(std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
-  virtual void callback_add(std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
-  virtual void add(const apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
+  virtual void add(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
   virtual int64_t sync_add(int32_t num1, int32_t num2);
-  virtual int64_t sync_add(const apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2);
+  virtual int64_t sync_add(apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2);
   virtual folly::Future<int64_t> future_add(int32_t num1, int32_t num2);
-  virtual folly::Future<int64_t> future_add(const apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2);
+  virtual folly::Future<int64_t> future_add(apache::thrift::RpcOptions& rpcOptions, int32_t num1, int32_t num2);
   virtual void add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2);
-  virtual void functor_add(std::function<void (::apache::thrift::ClientReceiveState&&)> callback, int32_t num1, int32_t num2);
   static folly::exception_wrapper recv_wrapped_add(int64_t& _return, ::apache::thrift::ClientReceiveState& state);
   static int64_t recv_add(::apache::thrift::ClientReceiveState& state);
   // Mock friendly virtual instance method
   virtual int64_t recv_instance_add(::apache::thrift::ClientReceiveState& state);
   virtual folly::exception_wrapper recv_instance_wrapped_add(int64_t& _return, ::apache::thrift::ClientReceiveState& state);
   template <typename Protocol_>
-  void addT(Protocol_* prot, const apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
+  void addT(Protocol_* prot, apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, int32_t num1, int32_t num2);
   template <typename Protocol_>
   static folly::exception_wrapper recv_wrapped_addT(Protocol_* prot, int64_t& _return, ::apache::thrift::ClientReceiveState& state);
   template <typename Protocol_>
